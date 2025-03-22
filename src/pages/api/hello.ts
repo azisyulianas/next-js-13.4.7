@@ -6,9 +6,6 @@ type Data = {
   age: number
 }
 
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
+export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
   res.status(200).json({ name: 'Azis Yulianas', age: 25})
 }
