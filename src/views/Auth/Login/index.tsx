@@ -15,7 +15,6 @@ const LoginView = () => {
     event.preventDefault()
     setError("")
     setIsLoading(true)
-
     try {
       const res = await signIn("credentials",{
         redirect: false,
@@ -52,6 +51,18 @@ const LoginView = () => {
           </div>
           <button className={style.login__form__item__button} type="submit" disabled={isLoading}>
             {isLoading ? "Loading...": "Login"}
+          </button>
+          <button 
+            onClick={()=>{
+              setError("")
+              setIsLoading(true)
+              signIn("google",{
+              callbackUrl,
+              redirect:false})
+          }
+          } className={style.login__form__item__google}
+            type="button">
+              Sign in with Google
           </button>
         </form>
       </div>

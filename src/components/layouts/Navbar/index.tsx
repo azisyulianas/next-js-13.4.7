@@ -3,12 +3,15 @@ import styles from "./Navbar.module.css"
 
 const Navbar = () =>{
   const {data}:any = useSession()
-  // console.log(data)
   return (
     <div className={styles.navbar}>
       <div className="big">Ini Navbar</div>
-      <div>
-        {data && data.user.fullname }
+      <div className={styles.profile}>
+        {data && data.user.fullname }{" "}
+        {data?.user?.image? 
+          (<img src={data.user.image} alt={data.user.fullname} className={styles.avatar}/>)
+          : ""
+        }
         {data?(
           <button className={styles.button} onClick={()=>signOut()}>Logout</button>
         ) : (

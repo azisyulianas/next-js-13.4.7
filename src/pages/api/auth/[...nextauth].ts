@@ -1,7 +1,9 @@
-import { signIn } from "@/utils/firebase/services";
+import { signIn, signInWithGoogle } from "@/utils/firebase/services";
 import { compare } from "bcrypt";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+
 
 const authOptions: NextAuthOptions = {
   session: {
@@ -33,14 +35,48 @@ const authOptions: NextAuthOptions = {
           return null
         }
       },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || ''
     })
   ],
   callbacks:{
-    jwt({token, account, profile, user}:any){
+    async jwt({token, account, profile, user}:any){
       if(account?.provider === 'credentials'){
         token.email = user.email;
         token.fullname = user.fullname;
         token.role = user.role;
+      }
+      if (account?.provider === 'google'){
+        const data = {
+          fullname:user.name,
+          email:user.email,
+          image:user.image,
+          type:"Google",
+          role:"member"
+        };
+
+        await signInWithGoogle(data, (result:{
+          status:boolean;
+          message:string;
+          data:{
+            email:string;
+            fullname:string;
+            type:string;
+            role:string;
+            image:string;
+          };
+        })=>{
+          if(result.status){
+            token.email = result.data.email;
+            token.fullname = result.data.fullname;
+            token.image = result.data.image;
+            token.type = result.data.type;
+            token.role = result.data.role
+          }
+        })
+
       }
       return token
     },
@@ -50,6 +86,9 @@ const authOptions: NextAuthOptions = {
       }
       if ("fullname" in token){
         session.user.fullname = token.fullname
+      }
+      if ("image" in token){
+        session.user.image = token.image
       }
       if ("role" in token){
         session.user.role = token.role
